@@ -7,14 +7,15 @@
 ## DAFTAR ISI
 1. [Ringkasan Eksekutif & Domain Masalah](#1-ringkasan-eksekutif--domain-masalah)
 2. [Arsitektur Perangkat Lunak & Design Pattern](#2-arsitektur-perangkat-lunak--design-pattern)
-3. [Pohon Direktori Lengkap & Penjelasan File](#3-pohon-direktori-lengkap--penjelasan-file)
-4. [Skema Basis Data & Relasi Eloquent (Data Layer)](#4-skema-basis-data--relasi-eloquent-data-layer)
-5. [Bedah Logika Bisnis: 8 Service Layer Utama](#5-bedah-logika-bisnis-8-service-layer-utama)
-6. [Alur Transaksi & State Machine (Life Cycle of an Order)](#6-alur-transaksi--state-machine-life-cycle-of-an-order)
-7. [Frontend Architecture, State & Real-Time Polling](#7-frontend-architecture-state--real-time-polling)
-8. [Panduan Menjawab Pertanyaan Dosen (Defense Q&A Guide)](#8-panduan-menjawab-pertanyaan-dosen-defense-qa-guide)
-9. [Panduan Menambah Fitur Baru (How-To Tutorial)](#9-panduan-menambah-fitur-baru-how-to-tutorial)
-10. [Kredensial Default & Perintah Esensial](#10-kredensial-default--perintah-esensial)
+3. [Analisis Mendalam Framework & Teknologi: Apa, Bagaimana, & Mengapa](#3-analisis-mendalam-framework--teknologi-apa-bagaimana--mengapa)
+4. [Pohon Direktori Lengkap & Penjelasan File](#4-pohon-direktori-lengkap--penjelasan-file)
+5. [Skema Basis Data & Relasi Eloquent (Data Layer)](#5-skema-basis-data--relasi-eloquent-data-layer)
+6. [Bedah Logika Bisnis: 8 Service Layer Utama](#6-bedah-logika-bisnis-8-service-layer-utama)
+7. [Alur Transaksi & State Machine (Life Cycle of an Order)](#7-alur-transaksi--state-machine-life-cycle-of-an-order)
+8. [Frontend Architecture, State & Real-Time Polling](#8-frontend-architecture-state--real-time-polling)
+9. [Panduan Menjawab Pertanyaan Dosen (Defense Q&A Guide)](#9-panduan-menjawab-pertanyaan-dosen-defense-qa-guide)
+10. [Panduan Menambah Fitur Baru (How-To Tutorial)](#10-panduan-menambah-fitur-baru-how-to-tutorial)
+11. [Kredensial Default & Perintah Esensial](#11-kredensial-default--perintah-esensial)
 
 ---
 
@@ -37,13 +38,6 @@
 ---
 
 ## 2. ARSITEKTUR PERANGKAT LUNAK & DESIGN PATTERN
-
-Aplikasi Our Coffee dibangun di atas stack modern:
-- **Backend**: PHP 8.3+, Laravel 13 Framework
-- **Frontend**: React 19, TypeScript, Tailwind CSS v4, Lucide React Icons, Shadcn UI
-- **Glue / Adapter**: Inertia.js v3 (Monolith Modern: Client-Side Routing dengan Server-Side State)
-- **Database**: MySQL 8.0 / MariaDB 10.11+
-- **Client State**: Zustand (untuk keranjang Kiosk)
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -93,7 +87,269 @@ Aplikasi Our Coffee dibangun di atas stack modern:
 
 ---
 
-## 3. POHON DIREKTORI LENGKAP & PENJELASAN FILE
+## 3. ANALISIS MENDALAM FRAMEWORK & TEKNOLOGI: APA, BAGAIMANA, & MENGAPA
+
+Bagian ini membahas secara komprehensif seluruh teknologi, framework, dan pustaka (*libraries*) yang digunakan dalam proyek **Our Coffee**. Setiap teknologi diuraikan dengan format: **Apa itu**, **Bagaimana implementasinya di proyek ini**, dan **Mengapa dipilih dibandingkan alternatifnya**.
+
+---
+
+### 3.1 PHP 8.3 & Laravel 13 (Backend Core & Enterprise Engine)
+
+#### A. Apa Itu?
+- **PHP 8.3**: Versi modern dari bahasa pemrograman PHP yang telah berevolusi menjadi bahasa berorientasi objek yang ketat (*strictly typed*), berkinerja tinggi berkat mesin JIT (*Just-In-Time Compiler*), serta mendukung fitur-fitur modern seperti *Typed Class Constants*, *Readonly Classes*, *Pattern Matching (`match`)*, dan *Constructor Property Promotion*.
+- **Laravel 13 (`laravel/framework: ^13.17`)**: Framework web PHP open-source nomor satu di dunia yang mengadopsi pola MVC (*Model-View-Controller*), dirancang dengan fokus pada keanggunan sintaksis (*developer happiness*), keamanan tinggi bawaan, dan ekosistem enterprise yang matang.
+
+#### B. Bagaimana Digunakan dalam Our Coffee?
+1. **Penerapan *Strict Types* & Modern OOP**:
+   Seluruh berkas PHP diawali dengan `declare(strict_types=1);`. Dependency Injection diinjeksikan secara rapi menggunakan *Constructor Property Promotion*:
+   ```php
+   // Contoh dari app/Services/OrderService.php
+   public function __construct(
+       private readonly BomCostService $bomCostService,
+       private readonly MenuAvailabilityService $availabilityService,
+       private readonly InventoryService $inventoryService,
+       private readonly QueueNumberGenerator $queueNumberGenerator,
+       private readonly QrisGatewayInterface $qrisGateway,
+       private readonly PinAuthorizationService $pinAuthorizationService,
+       private readonly AuditLogService $auditLogService,
+   ) {}
+   ```
+2. **Type-Safe Backed Enums**:
+   Memanfaatkan PHP 8.1+ Enums untuk 10 tipe data penting kafe (`OrderStatus`, `PaymentMethod`, `StockMovementType`, `UserRole`, dll.) sehingga tidak ada lagi nilai string mentah (*magic strings*) yang rawan *typo*.
+3. **Database Transactions & Concurrency Control**:
+   Memanfaatkan `DB::transaction()` dan klausa `lockForUpdate()` milik Laravel Eloquent untuk menjamin operasi perbankan/stok bersifat ACID.
+4. **Middleware Pipeline**:
+   Mengatur otentikasi peran staf (`EnsureUserHasRole`), pengecekan shift kasir aktif (`EnsureShiftIsOpen`), dan identifikasi fisik mesin kios (`EnsureKioskDevice`).
+
+#### C. Mengapa Memilih Laravel 13? (Justifikasi & Analisis Komparatif)
+- **Keamanan Enterprise Bawaan**: Laravel secara otomatis melindungi aplikasi dari serangan web paling mematikan:
+  - *SQL Injection*: Dicegah oleh PDO Parameter Binding pada Eloquent ORM.
+  - *Cross-Site Request Forgery (CSRF)*: Token diverifikasi otomatis pada setiap request POST/PUT/DELETE.
+  - *Cross-Site Scripting (XSS)*: Sanitasi data otomatis.
+  - *Session Hijacking*: Session cookie terenkripsi dan berstatus `HTTP-Only` + `SameSite=Lax`.
+- **Ekosistem Lengkap (Batteries Included)**: Menyediakan sistem migrasi database terstruktur, seeder, sistem otentikasi (Laravel Fortify), rate limiting (throttle), task scheduling, dan ORM tanpa perlu menginstal puluhan paket pihak ketiga secara manual.
+
+#### D. Perbandingan dengan Alternatif:
+| Framework / Bahasa | Kelebihan | Kelemahan Dibanding Laravel 13 di Our Coffee |
+| :--- | :--- | :--- |
+| **Express.js / Node.js** | Ringan, I/O non-blocking, bahasa sama dengan frontend (JavaScript). | **Tidak memiliki struktur standar.** Developer harus merakit sendiri ORM (Prisma/TypeORM), auth, migrasi, dan validasi. Rawan inkonsistensi arsitektur dan rentan terhadap *callback hell* atau *unhandled promise rejections* pada transaksi basis data kompleks. |
+| **Django (Python)** | Built-in Admin panel yang cepat, ORM yang kuat. | Tidak memiliki adapter modern sekelas Inertia.js yang se-matang ekosistem Laravel. Manipulasi UI reaktif di Django sering kali membutuhkan REST API/GraphQL terpisah atau template server render yang kaku. |
+| **Spring Boot (Java)** | Performa sangat tinggi untuk skala perbankan raksasa. | **Overhead konfigurasi yang masif (*over-engineering*).** Waktu pengembangan (*time-to-market*) sangat lambat, konsumsi RAM server sangat besar (bisa >1-2 GB hanya untuk idle), tidak cocok untuk kelincahan operasional kafe. |
+
+---
+
+### 3.2 Inertia.js v3 (The Modern Monolith Bridge)
+
+#### A. Apa Itu?
+**Inertia.js** (`@inertiajs/react: ^3.0.0` & `inertiajs/inertia-laravel: ^3.0`) adalah pustaka revolusioner yang berfungsi sebagai jembatan (*glue*) antara backend framework klasik (Laravel) dengan pustaka frontend modern berbasis komponen (React). Inertia dijuluki sebagai **"The Modern Monolith"**.
+
+#### B. Bagaimana Digunakan dalam Our Coffee?
+- Alih-alih membuat REST API yang mengembalikan JSON mentah melalui endpoint terpisah seperti `/api/pos/orders`, Controller Laravel langsung memanggil `Inertia::render()`:
+  ```php
+  // app/Http/Controllers/Pos/PosController.php
+  return Inertia::render('pos/index', [
+      'categories' => $categories,
+      'menuItems' => $menuItems,
+      'pendingKioskOrders' => $pendingKioskOrders,
+  ]);
+  ```
+- Di sisi frontend React (`resources/js/pages/pos/index.tsx`), halaman menerima data tersebut sebagai **React Props biasa**:
+  ```tsx
+  export default function PosIndex({ categories, menuItems, pendingKioskOrders }: PosProps) {
+      // Langsung dapat digunakan tanpa useEffect atau fetch() manual!
+  }
+  ```
+- Saat kasir melunasi pesanan atau menekan tombol, pengiriman data dilakukan menggunakan `router.post()` dari Inertia. Browser **tidak melakukan full page reload**, melainkan hanya melakukan AJAX request khusus yang mengembalikan data baru secara parsial.
+
+#### C. Mengapa Memilih Inertia.js?
+1. **Menghilangkan Duplikasi Pekerjaan REST API**: Pada aplikasi SPA tradisional, developer harus:
+   - Membuat Route Web + Route API.
+   - Membuat Controller API + API Resources / DTO Transformer.
+   - Mengatur CORS (*Cross-Origin Resource Sharing*).
+   - Mengatur autentikasi berbasis JWT (JSON Web Token) atau OAuth2.
+   - Membuat fungsi `fetch()` / `axios` di frontend beserta state `isLoading`, `isError`, dan `data`.
+   *Dengan Inertia.js, 100% kerumitan di atas hilang!*
+2. **Keamanan Jauh Lebih Unggul daripada SPA Terpisah**:
+   - Pada SPA terpisah, token JWT sering kali disimpan di `localStorage` browser, yang mana sangat rentan dicuri lewat serangan **XSS (Cross-Site Scripting)**.
+   - Inertia tetap menggunakan mekanisme sesi berbasis cookie bawaan Laravel (`laravel_session`) yang dilindungi flag `HttpOnly`, `Secure`, dan `SameSite`, sehingga JavaScript berbahaya sama sekali tidak bisa membaca data sesi otentikasi.
+3. **Single Source of Truth**: State data berada di server (database). Data yang dikirim ke halaman React dijamin selalu segar dan konsisten dengan aturan otorisasi server.
+
+#### D. Perbandingan dengan Alternatif:
+- **Vs Blade Template (Laravel Klasik)**: Blade me-render ulang seluruh halaman HTML setiap kali pengguna mengeklik link atau submit form. Pada layar POS dan Kiosk, layar akan berkedip putih (*flash/reload*), merusak pengalaman pengguna kasir dan pelanggan yang membutuhkan responsivitas instan secepat aplikasi mobile native.
+- **Vs SPA REST API Terpisah (Next.js / Vite SPA Standalone)**: Membutuhkan pemeliharaan 2 repositori atau 2 build pipeline yang berbeda. Jika skema database di backend berubah, frontend sering kali mengalami error diam-diam (*silent failure*) karena ketidakcocokan tipe data JSON.
+
+---
+
+### 3.3 React 19 & TypeScript 5.7 (Frontend Component Layer & Type Safety)
+
+#### A. Apa Itu?
+- **React 19 (`react: ^19.2.0`)**: Rilis mayor terbaru dari pustaka antarmuka pengguna berbasis komponen deklaratif yang dikembangkan oleh Meta. Menghadirkan efisiensi rendering terbaik dan integrasi kompiler modern.
+- **TypeScript 5.7 (`typescript: ^5.7.2`)**: Bahasa superset dari JavaScript yang menambahkan sistem tipe statis (*static typing*) pada waktu kompilasi (*compile-time*).
+
+#### B. Bagaimana Digunakan dalam Our Coffee?
+1. **Arsitektur Komponen Modular**:
+   Antarmuka Kiosk, POS, KDS, dan Display TV dibagi menjadi komponen-komponen kecil yang dapat digunakan kembali (*reusable*):
+   - `components/pos/num-pad.tsx`: Papan tombol angka interaktif untuk pembayaran uang tunai kasir.
+   - `components/pos/supervisor-pin-modal.tsx`: Modal verifikasi PIN 6 digit admin.
+   - `components/pos/thermal-receipt.tsx`: Tampilan struk belanja yang diformat presisi untuk printer kasir 58mm/80mm.
+   - `components/kiosk/modifier-sheet.tsx`: Bottom sheet/modal pemilihan varian gula, es, dan susu.
+2. **Definisi Kontrak Data Kuat (Type Contracts)**:
+   Semua data dari backend memiliki interface TypeScript yang ketat (`resources/js/types/index.ts`):
+   ```typescript
+   export interface MenuItem {
+       id: number;
+       category_id: number;
+       name: string;
+       price: number;
+       cost_estimate: number;
+       is_available: boolean;
+       recipe_items?: MenuItemIngredient[];
+   }
+   ```
+
+#### C. Mengapa Memilih React 19 & TypeScript?
+1. **Reaktivitas Antarmuka Kasir & Kiosk yang Kompleks**:
+   Di layar Kiosk, saat pelanggan memilih menu *Kopi Susu* lalu mencentang *Oat Milk (+Rp 6.000)* dan *Double Shot (+Rp 5.000)*, total harga belanja harus langsung berubah secara instan tanpa ada jeda. Pola deklaratif React (`UI = f(state)`) menjamin tampilan selalu sinkron dengan state data.
+2. **Pencegahan Bug Finansial Berbahaya**:
+   Pada JavaScript biasa, operasi angka sangat rentan menghasilkan bug fatal:
+   `const total = price + modifier;` $\rightarrow$ Jika `modifier` tidak sengaja bertipe string `"5000"`, hasilnya menjadi `"250005000"` (bukan `30000`). TypeScript mendeteksi kesalahan tipe ini langsung di editor sebelum kode sempat dijalankan.
+3. **Refactoring Tanpa Rasa Takut**:
+   Ketika nama atribut di backend diubah, TypeScript Compiler (`tsc --noEmit`) akan langsung memberitahukan seluruh baris kode frontend mana saja yang terdampak dan perlu disesuaikan.
+
+---
+
+### 3.4 Tailwind CSS v4 & Rust Oxide Engine (Design System & Styling)
+
+#### A. Apa Itu?
+**Tailwind CSS v4 (`tailwindcss: ^4.0.0`)** adalah generasi terbaru dari framework CSS *utility-first*. Pada versi 4, arsitektur Tailwind telah ditulis ulang sepenuhnya menggunakan bahasa pemrograman berkinerja tinggi **Rust** melalui engine baru bernama **Oxide**, menghilangkan kebutuhan berkas konfigurasi JavaScript `tailwind.config.js` yang rumit.
+
+#### B. Bagaimana Digunakan dalam Our Coffee?
+1. **Palet Warna Mewah Khas Kafe (*Amber & Charcoal Theme*)**:
+   Warna didefinisikan menggunakan CSS Variable modern di `resources/css/app.css`:
+   - Latar belakang gelap elegan: `bg-stone-950`, `bg-[#1c1917]`
+   - Aksen kopi hangat: `amber-500`, `amber-600`, `orange-600`
+   - Kontras teks tinggi: `text-stone-100`, `text-amber-400`
+2. **Tipografi Khusus Mata Uang (`font-money`)**:
+   Dibuat class khusus `.font-money` yang menggunakan fitur OpenType `font-variant-numeric: tabular-nums;`. Ini memastikan seluruh digit angka Rupiah memiliki lebar yang sama persis, sehingga kolom angka pada tabel laporan dan struk belanja tersusun sejajar lurus ke bawah.
+3. **Cetak Struk Termal Ramah Cetak (`@media print`)**:
+   Pengaturan khusus di CSS agar saat tombol "Cetak Struk" ditekan, browser hanya mencetak elemen struk thermal (`.thermal-receipt`) dan menyembunyikan seluruh sidebar navigasi kasir, tombol, dan header.
+
+#### C. Mengapa Memilih Tailwind CSS v4?
+1. **Zero CSS Bloat (Ukuran File Minimal)**: Tailwind hanya mengompilasi kelas CSS yang benar-benar digunakan dalam kode JSX. Hasil berkas CSS akhir sangat kecil (<30-50 KB), mempercepat waktu muat awal pada perangkat tablet Kiosk atau smartphone kasir yang terkoneksi Wi-Fi kafe.
+2. **Bebas Masalah *Naming Fatigue***: Pengembang tidak perlu membuang waktu memikirkan nama class seperti `.order-container-card-inner-box-v2`. Semua styling ditulis langsung menggunakan kelas utilitas deklaratif (`flex items-center justify-between p-4 rounded-xl`).
+3. **Konsistensi Desain**: Seluruh margin, padding, border radius, dan ukuran font berpedoman pada skala standar yang harmonis.
+
+---
+
+### 3.5 Zustand 5 (Reactive Client State Management)
+
+#### A. Apa Itu?
+**Zustand (`zustand: ^5.1.0`)** adalah pustaka manajemen state sisi klien (*client-side state management*) untuk React yang sangat cepat, berbasis kait (*hook-based*), dan berukuran sangat kecil (kurang dari 1 KB).
+
+#### B. Bagaimana Digunakan dalam Our Coffee?
+Zustand digunakan secara eksklusif untuk mengelola keranjang belanja mandiri di layar Kiosk (`resources/js/stores/kiosk-cart-store.ts`):
+```typescript
+interface KioskCartStore {
+    orderType: 'dine_in' | 'takeaway';
+    customerName: string;
+    items: CartItem[];
+    addItem: (item: Omit<CartItem, 'id'>) => void;
+    removeItem: (id: string) => void;
+    updateQuantity: (id: string, delta: number) => void;
+    clearCart: () => void;
+    subtotal: () => number;
+}
+```
+Komponen kartu menu, modal modifier, dan ringkasan keranjang dapat membaca dan memperbarui keranjang dari komponen mana saja tanpa perlu mengoper props ke bawah (*prop drilling*).
+
+#### C. Mengapa Memilih Zustand Dibanding Redux atau Context API?
+- **Vs Redux Toolkit**: Redux memiliki *boilerplate* yang luar biasa masif (Actions, Reducers, Dispatchers, Slice, Store Provider). Untuk aplikasi Kiosk, Redux adalah contoh klasik *over-engineering* yang memperlambat kode.
+- **Vs React Context API**: Context API memiliki cacat performa bawaan: setiap kali salah satu nilai di Context berubah (misal pelanggan menambah 1 pcs gula), **seluruh komponen anak** yang berada di dalam Provider tersebut akan dipaksa untuk me-render ulang (*unnecessary re-renders*). Pada perangkat Kiosk layar sentuh bertipe tablet murah/layar All-In-One industri, hal ini menyebabkan UI terasa tersendat (*laggy*). Zustand mengeliminasi masalah ini karena komponen hanya me-render ulang jika bagian data (*slice*) yang dilanggannya benar-benar berubah.
+
+---
+
+### 3.6 Radix UI Primitives & Shadcn UI (Headless Accessible Architecture)
+
+#### A. Apa Itu?
+- **Radix UI (`@radix-ui/react-*`)**: Pustaka komponen primitif *headless* (tanpa gaya bawaan) yang dirancang khusus untuk memenuhi standar aksesibilitas internasional tertinggi (**WAI-ARIA**).
+- **Shadcn UI**: Paradigma arsitektur UI modern di mana kode komponen tidak diinstal sebagai pustaka `node_modules` yang tertutup, melainkan disalin (*copy-paste/scaffolded*) langsung ke dalam folder proyek (`resources/js/components/ui/`), memberikan kendali penuh 100% kepada developer atas markup dan styling-nya.
+
+#### B. Bagaimana Digunakan dalam Our Coffee?
+Komponen krusial seperti Dialog Modal (`@radix-ui/react-dialog`), Dropdown Menu (`@radix-ui/react-dropdown-menu`), Tooltip, dan Popover diintegrasikan ke dalam:
+- Modal konfirmasi tutup shift kasir.
+- Modal verifikasi PIN 6 digit admin.
+- Lembar kustomisasi modifier menu di Kiosk.
+
+#### C. Mengapa Memilih Radix UI?
+1. **Aksesibilitas & Keyboard Navigation Otomatis**: Menangani perilaku rumit secara native:
+   - *Focus Trapping*: Kursor keyboard tidak bisa melompat keluar dari modal yang sedang terbuka.
+   - *Esc Key Listener*: Menekan tombol Escape otomatis menutup dialog.
+   - *Screen Reader Friendly*: Atribut ARIA (`aria-expanded`, `aria-haspopup`, `role="dialog"`) terpasang dengan benar.
+2. **Kustomisasi Tanpa Batas**: Berbeda dengan pustaka seperti Bootstrap atau Ant Design yang memaksakan warna dan bentuk tombol mereka, Radix UI tidak memiliki opini styling sama sekali. Kita bebas mewarnainya dengan tema amber/kopi menggunakan Tailwind CSS.
+
+---
+
+### 3.7 MySQL 8.0 / MariaDB 10.11+ dengan InnoDB Engine (Relational Storage)
+
+#### A. Apa Itu?
+Sistem manajemen basis data relasional (*Relational Database Management System* / RDBMS) berstandar industri dengan mesin penyimpanan **InnoDB** yang mendukung penuh transaksi ACID (*Atomicity, Consistency, Isolation, Durability*).
+
+#### B. Bagaimana Digunakan dalam Our Coffee?
+- Mengelola 18 tabel domain yang saling berelasi dengan kunci asing (*Foreign Keys*).
+- Menjalankan penguncian pesimistik tingkat baris (*Row-Level Pessimistic Locking*) via `SELECT ... FOR UPDATE` saat pemotongan stok bahan baku dan penomoran antrean.
+
+#### C. Mengapa Memilih RDBMS Relasional Dibanding NoSQL (MongoDB)?
+- **Integritas Transaksional Keuangan**: Dalam bisnis kafe, pesanan melibatkan uang, pemotongan stok bahan, pencatatan mutasi, dan pembukuan kasir. Jika kasir menerima uang tetapi koneksi terputus saat memotong stok, transaksi harus di-*rollback* total (**Atomicity**).
+- **Relasi Kompleks yang Alami**: Resep Bill of Materials (BOM) adalah relasi relasional murni: *Satu Menu memiliki Banyak Resep, Satu Resep merujuk ke Satu Bahan Baku*. Di MongoDB (NoSQL), jika data bahan baku diduplikasi (*denormalized*) ke dalam dokumen menu, maka saat harga beli kopi naik dari distributor, kita harus memperbarui ribuan dokumen menu secara manual yang rawan inkonsistensi (*data anomaly*).
+
+---
+
+### 3.8 Pest PHP 5, Larastan 3 & Pint (Code Quality & Verification Engine)
+
+#### A. Apa Itu?
+- **Pest PHP (`pestphp/pest: ^5.3`)**: Framework pengujian PHP modern dengan sintaks berbasis penutupan fungsional (*functional closures*) yang sangat ekspresif, dibangun di atas PHPUnit.
+- **Larastan (`larastan/larastan: ^3.9`)**: Alat analisis statis berbasis PHPStan yang memahami keajaiban magis Eloquent Laravel, mendeteksi potensi bug sebelum kode dijalankan.
+- **Laravel Pint (`laravel/pint: ^1.27`)**: Linter dan formatter kode otomatis berbasis standar industri PHP PSR-12.
+
+#### B. Bagaimana Digunakan dalam Our Coffee?
+Proyek ini dilengkapi dengan **72 automated tests** (`tests/Feature/` dan `tests/Unit/`) yang menguji seluruh skenario nyata:
+- Pengecekan stok bahan baku berkurang dengan benar saat pembayaran lunas.
+- Penolakan akses Kiosk jika cookie token tidak valid.
+- Penolakan akses POS jika kasir belum membuka shift.
+- Penolakan void pesanan jika PIN admin salah.
+
+#### C. Mengapa Ini Penting untuk Sidang / Penilaian Dosen?
+Menunjukkan kepada dosen penguji bahwa aplikasi ini tidak hanya "tampak berjalan di layar", tetapi memiliki **jaminan kualitas perangkat lunak (*Software Quality Assurance*)** berstandar industri yang terverifikasi lewat *automated regression testing*.
+
+---
+
+### 3.9 Vite & Tooling Ekosistem Modern
+
+#### A. Apa Itu?
+**Vite (`vite: 1.4.0`)** adalah build tool frontend modern yang memanfaatkan fitur native ES Modules pada browser modern untuk menghadirkan kompilasi secepat kilat.
+
+#### B. Mengapa Memilih Vite Dibanding Webpack?
+- **Instant Hot Module Replacement (HMR)**: Saat developer mengedit tampilan React atau CSS, perubahan langsung muncul di browser dalam hitungan milidetik tanpa perlu me-reload seluruh halaman dan tanpa kehilangan state form yang sedang diisi.
+- **Waktu Build Super Cepat**: Menggunakan bundler berbasis Rollup/Rust yang jauh lebih hemat memori dan berlipat-lipat lebih cepat dibanding Webpack konvensional.
+
+---
+
+### 3.10 Matriks Perbandingan & Alasan Pemilihan Stack (Executive Summary Matrix)
+
+| Komponen Arsitektur | Teknologi Terpilih | Alternatif yang Ditolak | Alasan Utama Pemilihan |
+| :--- | :--- | :--- | :--- |
+| **Backend Framework** | **Laravel 13 (PHP 8.3)** | Express.js / Django / Spring Boot | Ekosistem paling terintegrasi, fitur keamanan bawaan lengkap (CSRF/Auth/DB Transactions), dan ORM Eloquent yang sangat ekspresif. |
+| **Arsitektur Integrasi** | **Inertia.js v3** | REST API Standalone / Blade SSR | Menghapus overhead pembuatan API ganda, keamanan berbasis session HTTP-Only yang anti-XSS, dan rendering secepat SPA tanpa kedipan reload. |
+| **Frontend UI Library** | **React 19 + TypeScript** | Vue.js / Blade / Vanilla JS | Komponen deklaratif yang reaktif untuk kalkulator modifier Kiosk, ditambah type-safety ketat TypeScript untuk mencegah bug salah hitung nominal uang. |
+| **Styling & CSS** | **Tailwind CSS v4** | Bootstrap 5 / Custom CSS | Engine baru berbasis Rust (Oxide) yang super cepat, zero CSS bloat, dan fleksibilitas penuh membuat tampilan bertema kafe premium. |
+| **Client State (Kiosk)** | **Zustand 5** | Redux Toolkit / Context API | Ukuran <1KB, bebas boilerplate action/reducer yang berbelit, dan mencegah lag re-render pada layar sentuh kios. |
+| **Komponen UI Primitif** | **Radix UI (Shadcn)** | Material UI (MUI) / Ant Design | Kepatuhan aksesibilitas internasional (WAI-ARIA), keyboard navigation otomatis, dan bebas dari opini styling bawaan yang kaku. |
+| **Basis Data** | **MariaDB / MySQL (InnoDB)**| MongoDB (NoSQL) / SQLite | Mendukung transaksi ACID perbankan penuh, pencegahan deadlock lewat penguncian baris (`lockForUpdate`), dan relasi ternormalisasi 3NF. |
+| **Pengujian Otomatis** | **Pest PHP 5** | Pengujian Manual / PHPUnit murni | Sintaks pengujian deklaratif yang elegan dan ekspresif untuk menguji 72 skenario bisnis secara otomatis dalam hitungan detik. |
+
+---
+
+## 4. POHON DIREKTORI LENGKAP & PENJELASAN FILE
 
 Berikut adalah peta struktur berkas utama proyek Our Coffee beserta fungsi teknisnya:
 
@@ -212,7 +468,7 @@ Our-Coffee/
 
 ---
 
-## 4. SKEMA BASIS DATA & RELASI ELOQUENT (DATA LAYER)
+## 5. SKEMA BASIS DATA & RELASI ELOQUENT (DATA LAYER)
 
 Basis data Our Coffee dirancang ternormalisasi (3NF) dengan integritas referensial yang kuat menggunakan *Foreign Keys* dan *Cascade Restrictions* untuk menjaga konsistensi keuangan kafe.
 
@@ -239,7 +495,7 @@ erDiagram
     ORDER_ITEMS ||--o{ ORDER_ITEM_MODIFIERS : "memiliki pilihan kustomisasi"
 ```
 
-### 4.1 Tabel-Tabel Utama & Karakteristik Penting
+### 5.1 Tabel-Tabel Utama & Karakteristik Penting
 1. **`ingredients`**:
    - Kolom: `id`, `name`, `unit` (g/ml/pcs), `current_stock` (DECIMAL 12,3), `cost_per_unit` (INT Rupiah), `minimum_stock_alert` (DECIMAL 12,3), `is_active`.
    - Menggunakan presisi 3 desimal untuk mendukung takaran akurat gram/mililiter (misal: 18.5 gram espresso beans atau 120.0 ml oat milk).
@@ -259,9 +515,9 @@ erDiagram
 
 ---
 
-## 5. BEDAH LOGIKA BISNIS: 8 SERVICE LAYER UTAMA
+## 6. BEDAH LOGIKA BISNIS: 8 SERVICE LAYER UTAMA
 
-### 5.1 `OrderService.php` (Pengelola Siklus Transaksi)
+### 6.1 `OrderService.php` (Pengelola Siklus Transaksi)
 - **`createOrder(array $payload): Order`**:
   1. Validasi keranjang belanja tidak kosong.
   2. Memeriksa ketersediaan stok bahan secara *real-time* via `MenuAvailabilityService::findUnavailableCartItems()`.
@@ -284,7 +540,7 @@ erDiagram
   - Membatalkan pesanan yang salah/batal dengan otorisasi wajib PIN Admin 6-digit.
   - Mengubah status pembayaran menjadi `refunded` dan merekam detail ke `AuditLog`.
 
-### 5.2 `InventoryService.php` (Manajemen Stok & Pencegahan Deadlock)
+### 6.2 `InventoryService.php` (Manajemen Stok & Pencegahan Deadlock)
 - **`restock(...)`**: Menambah stok bahan baku, memperbarui harga rata-rata bahan (*moving cost*), dan membuat rekaman `StockMovementType::Restock`.
 - **`recordWaste(...)`**: Mengurangi stok bahan yang tumpah/kedaluwarsa dengan alasan wajib dan log audit.
 - **`recordOpname(...)`**: Menyesuaikan stok sistem agar cocok dengan stok fisik aktual di gudang kafe.
@@ -295,7 +551,7 @@ erDiagram
   - Memeriksa apakah stok fisik mencukupi. Jika kurang, melempar `StockConflictException`.
   - Mengurangi kolom `current_stock` dan membuat entri mutasi `StockMovementType::Sale` yang merujuk pada `order_id`.
 
-### 5.3 `BomCostService.php` (Kalkulasi HPP & Margin Laba)
+### 6.3 `BomCostService.php` (Kalkulasi HPP & Margin Laba)
 - Menghitung HPP formula:
   $$\text{COGS} = \sum (\text{Qty Bahan} \times \text{Cost per Unit Bahan}) + \sum (\text{Qty Modifier Bahan} \times \text{Cost per Unit})$$
 - Menghitung Laba Kotor dan Persentase Margin:
@@ -303,27 +559,27 @@ erDiagram
   $$\text{Margin \%} = \left(\frac{\text{Gross Profit}}{\text{Selling Price}}\right) \times 100\%$$
 - Menyediakan metode `previewRecipeCost()` untuk kalkulasi interaktif secara instan di UI admin saat admin menggeser takaran resep.
 
-### 5.4 `MenuAvailabilityService.php` (Ketersediaan Menu Dinamis)
+### 6.4 `MenuAvailabilityService.php` (Ketersediaan Menu Dinamis)
 - Menentukan apakah suatu menu dapat dipesan atau harus ditampilkan "Habis" secara otomatis.
 - Memeriksa flag manual `is_available` dan stok fisik seluruh bahan penyusun resep.
 - Menghitung `max_servings`: porsi maksimal yang bisa disajikan berdasarkan bahan baku yang paling kritis (*bottleneck ingredient*). Contoh: jika bubuk kopi cukup untuk 20 cangkir, tapi susu hanya tersisa untuk 3 cangkir latte, maka `max_servings` Latte adalah 3 porsi.
 - Mencegah masalah query N+1 dengan memanfaatkan *eager loading* `recipeItems.ingredient`.
 
-### 5.5 `QueueNumberGenerator.php` (Generator Antrean Harian Unik)
+### 6.5 `QueueNumberGenerator.php` (Generator Antrean Harian Unik)
 - Menghasilkan nomor antrean format `A-001`, `A-002` yang **otomatis ter-reset menjadi `A-001` setiap pergantian hari** (berdasarkan zona waktu `Asia/Jakarta`).
 - Menggunakan `Order::whereDate('queue_date', $today)->lockForUpdate()` untuk mencegah dua pesanan yang dibuat pada milidetik yang sama mendapatkan nomor antrean yang kembar.
 - Menghasilkan format kode order permanen: `OC-YYYYMMDD-XXXX`.
 
-### 5.6 `PinAuthorizationService.php` (Otorisasi Supervisor)
+### 6.6 `PinAuthorizationService.php` (Otorisasi Supervisor)
 - Memvalidasi 6-digit PIN angka untuk aksi-aksi berbahaya (Void pesanan, Diskon manual, dan Keluar dari layar Kiosk).
 - PIN di-*hash* menggunakan algoritma `Bcrypt` standar Laravel (`Hash::make($pin)`).
 - Menolak otorisasi jika format tidak 6 digit atau jika hash tidak cocok dengan admin yang aktif.
 
-### 5.7 `AuditLogService.php` (Jejak Rekam yang Tidak Dapat Diubah)
+### 6.7 `AuditLogService.php` (Jejak Rekam yang Tidak Dapat Diubah)
 - Mencatat aksi-aksi penting: `order.void`, `order.discount`, `stock.waste`, `stock.opname`, `kiosk.device_paired`.
 - Menyimpan ID pelaku (`actor_id`), ID yang mengotorisasi via PIN (`authorized_by`), payload JSON metadata, dan IP address pemanggil.
 
-### 5.8 `SimulatedQrisGateway.php` & `QrisGatewayInterface.php`
+### 6.8 `SimulatedQrisGateway.php` & `QrisGatewayInterface.php`
 - Mensimulasikan siklus hidup QRIS standar:
   - Generate QR Payload dan kode referensi unik.
   - Simulasi batas waktu kedaluwarsa (default: 300 detik / 5 menit).
@@ -331,7 +587,7 @@ erDiagram
 
 ---
 
-## 6. ALUR TRANSAKSI & STATE MACHINE
+## 7. ALUR TRANSAKSI & STATE MACHINE
 
 ```
                        +-----------------------+
@@ -396,9 +652,9 @@ erDiagram
 
 ---
 
-## 7. FRONTEND ARCHITECTURE, STATE & REAL-TIME POLLING
+## 8. FRONTEND ARCHITECTURE, STATE & REAL-TIME POLLING
 
-### 7.1 Mengapa Inertia.js?
+### 8.1 Mengapa Inertia.js?
 Inertia.js menghilangkan kebutuhan membangun REST API terpisah (beserta kerumitan autentikasi JWT/OAuth, serialisasi DTO, dan duplikasi routing).
 - Laravel Controller berfungsi sebagai pengatur alur data dan mengembalikan komponen React:
   ```php
@@ -410,26 +666,26 @@ Inertia.js menghilangkan kebutuhan membangun REST API terpisah (beserta kerumita
   ```
 - React menerima data tersebut secara langsung melalui **Props**, dengan tipe data yang ketat (*Strict TypeScript*).
 
-### 7.2 Manajemen State Keranjang Belanja (`kiosk-cart-store.ts`)
+### 8.2 Manajemen State Keranjang Belanja (`kiosk-cart-store.ts`)
 Khusus di antarmuka Kiosk, keranjang belanja pelanggan dikelola di sisi klien menggunakan **Zustand**:
 - Menyimpan daftar item belanja beserta pilihan modifikasinya.
 - Menghitung total harga belanja secara lokal secara instan.
 - Mendukung fitur reset otomatis jika pesanan selesai atau dibatalkan.
 
-### 7.3 Sinkronisasi Real-Time Tanpa Beban WebSocket (`use-polling.ts`)
+### 8.3 Sinkronisasi Real-Time Tanpa Beban WebSocket (`use-polling.ts`)
 Alih-alih menggunakan WebSocket server (seperti Pusher atau Laravel Reverb) yang memerlukan konfigurasi daemon server dan biaya tambahan, Our Coffee menggunakan custom React hook `usePolling`:
 - **KDS Dapur**: Melakukan polling setiap 5 detik ke endpoint `/kds/tickets` secara senyap (*background fetch*).
 - **POS Kasir**: Melakukan polling setiap 5 detik ke `/pos/queue` untuk mendeteksi pesanan Kiosk baru yang datang untuk bayar tunai.
 - **TV Antrean**: Melakukan polling setiap 4 detik ke `/display/queue/feed`.
 - **Hemat Bandwidth**: Polling hanya mengambil data JSON ringan, bukan merender ulang seluruh halaman HTML.
 
-### 7.4 Keamanan Layar Kiosk (`EnsureKioskDevice` & `pin-exit-modal.tsx`)
+### 8.4 Keamanan Layar Kiosk (`EnsureKioskDevice` & `pin-exit-modal.tsx`)
 - Perangkat Kiosk diidentifikasi menggunakan `kiosk_device_token` yang disimpan dalam cookie terenkripsi HTTP-Only.
 - Pelanggan tidak bisa keluar dari mode Kiosk untuk membuka dashboard admin karena tombol keluar dilindungi oleh modal verifikasi PIN Admin 6 digit (`PinExitModal`).
 
 ---
 
-## 8. PANDUAN MENJAWAB PERTANYAAN DOSEN (DEFENSE Q&A GUIDE)
+## 9. PANDUAN MENJAWAB PERTANYAAN DOSEN (DEFENSE Q&A GUIDE)
 
 Gunakan panduan berikut jika dosen penguji menanyakan aspek teknis dari sistem ini:
 
@@ -499,7 +755,42 @@ Gunakan panduan berikut jika dosen penguji menanyakan aspek teknis dari sistem i
 
 ---
 
-## 9. PANDUAN MENAMBAH FITUR BARU (HOW-TO TUTORIAL)
+### Q8: "Mengapa Anda memilih database Relasional (MariaDB/MySQL) alih-alih NoSQL (seperti MongoDB), padahal pesanan kafe sering berbentuk hierarkis seperti dokumen JSON?"
+> **Jawaban Terbaik:**  
+> "Meskipun sekilas data pesanan terlihat seperti dokumen, proses bisnis inti kafe sangat bertumpu pada **konsistensi relasional dan integritas finansial (ACID)**.  
+> Dalam aplikasi ini, terdapat hubungan erat antara Penjualan, Resep Menu (BOM), Pengurangan Stok Fisik, Perhitungan Laba Kotor, dan Rekonsiliasi Kasir.  
+> Jika menggunakan NoSQL:
+> 1. Mengurangi stok bahan baku saat beberapa pesanan datang bersamaan rawan mengalami anomali karena ketiadaan penguncian baris (*pessimistic row locking*) sekuat InnoDB.
+> 2. Perubahan harga bahan baku dari distributor atau perubahan resep akan menyebabkan inkonsistensi pada dokumen yang didenormalisasi.  
+> Dengan RDBMS, kami memanfaatkan Foreign Keys, Cascade Restrictions, dan `DB::transaction()` dengan jaminan integritas 100%."
+
+---
+
+### Q9: "Kenapa Anda menggunakan Zustand untuk keranjang Kiosk, bukan Redux Toolkit atau React Context API?"
+> **Jawaban Terbaik:**  
+> "Ada dua pertimbangan utama:
+> 1. **Menghindari Re-render Berlebih (*Performance Optimization*)**: React Context API memicu render ulang pada seluruh komponen anak setiap kali ada nilai context yang berubah. Pada tablet Kiosk berlayar sentuh, penambahan item dapat terasa tersendat (*laggy*). Zustand hanya me-render ulang komponen yang secara spesifik me-*subscribe* ke slice data tersebut.
+> 2. **Efisiensi Kode (*No Boilerplate*)**: Redux Toolkit membutuhkan konfigurasi slice, reducers, dispatchers, action creators, dan Store Provider yang sangat verbose. Zustand memberikan fungsionalitas yang sama kuatnya dalam satu berkas bersih (`kiosk-cart-store.ts`) berukuran kurang dari 1 KB."
+
+---
+
+### Q10: "Mengapa Anda menggunakan Tailwind CSS v4 dibanding Bootstrap 5 atau CSS kustom murni?"
+> **Jawaban Terbaik:**  
+> "1. **Kustomisasi & Desain Premium**: Bootstrap 5 membawa opini visual yang kaku dan menghasilkan tampilan website generik yang sulit disesuaikan dengan estetika kafe modern bernuansa *amber/charcoal*.  
+> 2. **Performa & Bundle Size**: Tailwind CSS v4 ditenagai engine baru berbasis Rust (Oxide) yang mengompilasi CSS secara instan dan hanya menyertakan class yang digunakan (*purged on-the-fly*), menghasilkan file CSS produksi di bawah 50 KB.  
+> 3. **Bebas Konflik Selector**: Tidak ada risiko bentrok nama kelas (*CSS specificity collision*) seperti pada CSS manual."
+
+---
+
+### Q11: "Apa fungsi dari 72 Automated Test (Pest) yang Anda buat? Apakah tidak cukup dengan mengetes secara manual di browser?"
+> **Jawaban Terbaik:**  
+> "Pengujian manual di browser memiliki kelemahan fatal: memakan waktu lama, tidak konsisten, dan mudah melewatkan kondisi batas (*edge cases*).  
+> Misalnya: bagaimana memastikan bahwa ketika kasir membatalkan pesanan (*void*), status pembayaran berubah jadi *refunded*, stok bahan baku tidak bocor, dan log audit otomatis tercatat? Menguji ini secara manual membutuhkan belasan langkah berulang.  
+> Dengan 72 Feature & Unit Tests di Pest PHP, seluruh alur bisnis—mulai dari RBAC, validasi shift kasir, formula BOM, hingga simulasi QRIS—dapat diuji secara menyeluruh hanya dalam waktu 3 detik, menjamin tidak ada regresi (*bug baru*) saat kode dikembangkan lebih lanjut."
+
+---
+
+## 10. PANDUAN MENAMBAH FITUR BARU (HOW-TO TUTORIAL)
 
 Gunakan panduan *step-by-step* ini jika Anda diminta oleh dosen atau ingin mengembangkan fitur baru pada aplikasi Our Coffee:
 
@@ -601,9 +892,9 @@ Jika kafe ingin mencantumkan informasi kalori pada setiap menu kopi:
 
 ---
 
-## 10. KREDENSIAL DEFAULT & PERINTAH ESENSIAL
+## 11. KREDENSIAL DEFAULT & PERINTAH ESENSIAL
 
-### 10.1 Akun Default Sistem (Hasil Database Seeder)
+### 11.1 Akun Default Sistem (Hasil Database Seeder)
 | Role Akun | Email Pengguna | Password | PIN Otorisasi (6 Digit) |
 | :--- | :--- | :--- | :--- |
 | **Owner / Admin** | `admin@ourcoffee.test` | `password` | **`123456`** |
@@ -612,7 +903,7 @@ Jika kafe ingin mencantumkan informasi kalori pada setiap menu kopi:
 
 > *Catatan Keamanan*: PIN **`123456`** digunakan oleh Admin untuk mengesahkan diskon, membatalkan (*void*) pesanan yang salah di kasir, dan membuka kunci keluar dari layar Kiosk.
 
-### 10.2 Perintah Operasional Esensial (Terminal Cheat Sheet)
+### 11.2 Perintah Operasional Esensial (Terminal Cheat Sheet)
 
 ```bash
 # 1. Reset database ke kondisi awal beserta data dummy lengkap:
