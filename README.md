@@ -8,19 +8,52 @@ Aplikasi ini dibangun menggunakan arsitektur modern berbasis **Laravel 13**, **I
 
 ## Daftar Isi
 
-1. [Fitur Utama & Modul Sistem](#fitur-utama--modul-sistem)
-2. [Panduan Operasional Pengguna](#panduan-operasional-pengguna)
+1. [Tangkapan Layar Antarmuka (Screenshots)](#tangkapan-layar-antarmuka-screenshots)
+2. [Fitur Utama & Modul Sistem](#fitur-utama--modul-sistem)
+3. [Panduan Operasional Pengguna](#panduan-operasional-pengguna)
     - [1. Alur Self-Ordering Kiosk (Pelanggan)](#1-alur-self-ordering-kiosk-pelanggan)
     - [2. Alur POS Kasir & Manajemen Shift (Kasir)](#2-alur-pos-kasir--manajemen-shift-kasir)
     - [3. Alur Kitchen Display System (Barista)](#3-alur-kitchen-display-system-barista)
     - [4. Alur Layar Antrean Publik (Pelanggan / Ruang Tunggu)](#4-alur-layar-antrean-publik-pelanggan--ruang-tunggu)
     - [5. Alur Backoffice & Manajemen Kafe (Owner / Admin)](#5-alur-backoffice--manajemen-kafe-owner--admin)
-3. [Hak Akses Pengguna (RBAC)](#hak-akses-pengguna-rbac)
-4. [Teknologi & Standar Desain](#teknologi--standar-desain)
-5. [Arsitektur Sistem & Database](#arsitektur-sistem--database)
-6. [Panduan Instalasi & Menjalankan Aplikasi](#panduan-instalasi--menjalankan-aplikasi)
-7. [Akun Bawaan & Pengujian Kiosk](#akun-bawaan--pengujian-kiosk)
-8. [Uji Kualitas & Otomatisasi Tes](#uji-kualitas--otomatisasi-tes)
+4. [Hak Akses Pengguna (RBAC)](#hak-akses-pengguna-rbac)
+5. [Teknologi & Standar Desain](#teknologi--standar-desain)
+6. [Arsitektur Sistem & Database](#arsitektur-sistem--database)
+7. [Panduan Instalasi & Menjalankan Aplikasi](#panduan-instalasi--menjalankan-aplikasi)
+8. [Akun Bawaan & Pengujian Kiosk](#akun-bawaan--pengujian-kiosk)
+9. [Uji Kualitas & Otomatisasi Tes](#uji-kualitas--otomatisasi-tes)
+
+---
+
+## Tangkapan Layar Antarmuka (Screenshots)
+
+Berikut adalah dokumentasi visual antarmuka pengguna (**User Interface**) sistem **Our Coffee**:
+
+### 1. Backoffice & Manajemen Operasional
+
+| Halaman Login Staf & Admin | Dashboard Operasional Admin Real-Time |
+| :---: | :---: |
+| ![Halaman Login](docs/screenshots/01-login.png) | ![Dashboard Admin](docs/screenshots/02-dashboard-admin.png) |
+| *Autentikasi aman staf dengan logo ikonik Our Coffee* | *KPI Omzet, tren penjualan 7 hari, heatmap jam sibuk & margin laba kotor* |
+
+### 2. Self-Ordering Kiosk (Layar Pelanggan)
+
+| Layar Awal (Idle / Welcome Screen) | Pemilihan Tipe Pesanan & Nama Pelanggan |
+| :---: | :---: |
+| ![Layar Awal Kiosk](docs/screenshots/03-kiosk-welcome.png) | ![Pemilihan Tipe Pesanan](docs/screenshots/04-kiosk-order-type.png) |
+| *Layar sambutan mandiri ramah sentuhan pelanggan* | *Pemilihan Dine-In / Takeaway dan identitas panggilan antrean* |
+
+| Katalog Menu Kiosk & Navigasi Kategori |
+| :---: |
+| ![Katalog Menu Kiosk](docs/screenshots/05-kiosk-menu.png) |
+| *Tampilan menu visual dengan kategori rail, harga, deskripsi, dan badge produk* |
+
+### 3. POS Kasir (Point of Sale)
+
+| Antarmuka Kasir POS 3 Kolom & Antrean Kiosk |
+| :---: |
+| ![Antarmuka POS Kasir](docs/screenshots/06-pos-kasir.png) |
+| *Kolom kiri: antrean Kiosk menunggu bayar | Kolom tengah: katalog cepat | Kolom kanan: faktur & NumPad tunai* |
 
 ---
 
@@ -84,6 +117,8 @@ Aplikasi ini dibangun menggunakan arsitektur modern berbasis **Laravel 13**, **I
 
 ### 1. Alur Self-Ordering Kiosk (Pelanggan)
 
+![Alur Pemesanan Kiosk](docs/screenshots/05-kiosk-menu.png)
+
 1. **Mulai Pemesanan**: Pelanggan menyentuh layar awal bertuliskan _"Mulai Pesan"_.
 2. **Pilih Tipe Pesanan**: Pilih opsi **Dine-In** (makan di tempat) atau **Takeaway** (bawa pulang), lalu masukkan nama panggilan (opsional).
 3. **Pilih Menu & Kustomisasi**:
@@ -97,7 +132,11 @@ Aplikasi ini dibangun menggunakan arsitektur modern berbasis **Laravel 13**, **I
     - Layar konfirmasi akan menampilkan nomor antrean (misal: `#A-001`).
     - Pelanggan menuju kasir untuk melakukan pembayaran tunai.
 
+---
+
 ### 2. Alur POS Kasir & Manajemen Shift (Kasir)
+
+![Alur POS Kasir](docs/screenshots/06-pos-kasir.png)
 
 1. **Membuka Shift Kasir**:
     - Masuk ke menu **Shift Kasir** (`/pos/shift`).
@@ -118,6 +157,8 @@ Aplikasi ini dibangun menggunakan arsitektur modern berbasis **Laravel 13**, **I
     - Pada akhir jam kerja, kembali ke menu **Shift Kasir**.
     - Hitung total uang tunai fisik di laci kasir, masukkan nominal pada form penutupan, lalu klik **Tutup Shift**. Sistem akan menghitung selisih kas (_variance_) secara otomatis.
 
+---
+
 ### 3. Alur Kitchen Display System (Barista)
 
 1. Buka layar **Kitchen (KDS)** di tablet atau monitor dapur (`/kds`).
@@ -125,6 +166,8 @@ Aplikasi ini dibangun menggunakan arsitektur modern berbasis **Laravel 13**, **I
 3. Saat mulai meracik minuman, barista mengetuk tombol **Mulai Siapkan** pada tiket $\to$ tiket berpindah ke kolom **Preparing**.
 4. Setelah minuman selesai diracik, ketuk tombol **Selesai / Panggil** $\to$ tiket berpindah ke kolom **Ready** dan nomor antrean otomatis muncul di monitor lobi.
 5. Saat pelanggan mengambil minumannya di meja pick-up, ketuk **Selesai Diambil** $\to$ tiket diarsipkan ke status **Completed**.
+
+---
 
 ### 4. Alur Layar Antrean Publik (Pelanggan / Ruang Tunggu)
 
@@ -134,7 +177,11 @@ Aplikasi ini dibangun menggunakan arsitektur modern berbasis **Laravel 13**, **I
     - **Siap Diambil**: Nomor antrean yang sudah siap diambil di konter penyerahan.
 3. Halaman ini bekerja secara otomatis (_hands-free_) tanpa perlu interaksi keyboard maupun mouse.
 
+---
+
 ### 5. Alur Backoffice & Manajemen Kafe (Owner / Admin)
+
+![Dashboard Admin](docs/screenshots/02-dashboard-admin.png)
 
 1. **Analisis Bisnis**: Masuk ke `/admin/dashboard` untuk memantau tren pendapatan, menu paling laku, dan ketersediaan stok bahan baku.
 2. **Pembaruan Resep & Menu**:
