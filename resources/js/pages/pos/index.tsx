@@ -4,10 +4,8 @@ import {
     Ban,
     CheckCircle2,
     Coffee,
-    CreditCard,
     Percent,
     Printer,
-    QrCode,
     Search,
     Trash2,
 } from 'lucide-react';
@@ -44,7 +42,7 @@ type PosProps = {
     };
 };
 
-type PaymentMethodTab = 'cash' | 'edc' | 'qris_manual';
+type PaymentMethodTab = 'cash';
 
 export default function PosIndexPage({
     categories: initialCategories,
@@ -77,9 +75,8 @@ export default function PosIndexPage({
     // ModifierSheet for Walk-In menu items
     const [sheetMenu, setSheetMenu] = useState<KioskMenuItem | null>(null);
 
-    // Discount & Payment state
-    const [paymentMethod, setPaymentMethod] =
-        useState<PaymentMethodTab>('cash');
+    // Discount & Payment state (Cash only)
+    const paymentMethod: PaymentMethodTab = 'cash';
     const [cashInput, setCashInput] = useState('');
     const [discountAuth, setDiscountAuth] = useState<{
         amount: number;
@@ -765,57 +762,18 @@ export default function PosIndexPage({
                                         : 'Terapkan Diskon Manual (PIN Admin)'}
                                 </Button>
 
-                                <div className="grid grid-cols-3 gap-1.5">
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentMethod('cash')}
-                                        className={cn(
-                                            'flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl border text-xs font-bold',
-                                            paymentMethod === 'cash'
-                                                ? 'border-primary bg-primary text-white'
-                                                : 'bg-background',
-                                        )}
-                                    >
+                                <div className="grid grid-cols-1">
+                                    <div className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary bg-primary text-sm font-bold text-white shadow-xs">
                                         <Banknote className="size-4" />
-                                        Tunai
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentMethod('edc')}
-                                        className={cn(
-                                            'flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl border text-xs font-bold',
-                                            paymentMethod === 'edc'
-                                                ? 'border-primary bg-primary text-white'
-                                                : 'bg-background',
-                                        )}
-                                    >
-                                        <CreditCard className="size-4" />
-                                        EDC
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setPaymentMethod('qris_manual')
-                                        }
-                                        className={cn(
-                                            'flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl border text-xs font-bold',
-                                            paymentMethod === 'qris_manual'
-                                                ? 'border-primary bg-primary text-white'
-                                                : 'bg-background',
-                                        )}
-                                    >
-                                        <QrCode className="size-4" />
-                                        QRIS
-                                    </button>
+                                        Pembayaran Tunai (Cash Only)
+                                    </div>
                                 </div>
 
-                                {paymentMethod === 'cash' && (
-                                    <NumPad
-                                        totalAmount={activeTotal}
-                                        value={cashInput}
-                                        onChange={setCashInput}
-                                    />
-                                )}
+                                <NumPad
+                                    totalAmount={activeTotal}
+                                    value={cashInput}
+                                    onChange={setCashInput}
+                                />
                             </>
                         )}
                     </div>

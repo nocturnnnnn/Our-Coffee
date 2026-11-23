@@ -156,7 +156,7 @@ export default function OurCoffeeRailLayout({
                             <p className="truncate text-base font-bold tracking-tight">
                                 Our Coffee
                             </p>
-                            <p className="truncate text-xs text-latte/75">
+                            <p className="truncate text-xs font-medium text-latte">
                                 Cafe Operations
                             </p>
                         </div>
@@ -213,7 +213,7 @@ export default function OurCoffeeRailLayout({
                             <p className="truncate text-sm font-semibold">
                                 {user.name}
                             </p>
-                            <p className="truncate text-xs text-latte/75 uppercase">
+                            <p className="truncate text-xs font-semibold tracking-wider text-latte uppercase">
                                 {user.role}
                             </p>
                         </div>

@@ -63,7 +63,7 @@ class MenuItemController extends Controller
                 'slug' => $item->slug,
                 'description' => $item->description,
                 'price' => $item->price,
-                'image_url' => $item->image_path !== null ? asset('storage/'.$item->image_path) : null,
+                'image_url' => $item->image_path !== null ? asset('storage/'.$item->image_path) : asset('images/dummy-coffee.svg'),
                 'badge' => $item->badge?->value,
                 'is_available' => $item->is_available,
                 'is_active' => $item->is_active,

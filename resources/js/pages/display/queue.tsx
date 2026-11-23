@@ -55,7 +55,7 @@ export default function QueueDisplayPage({
                             <h1 className="text-2xl font-extrabold tracking-tight">
                                 {cafeName}
                             </h1>
-                            <p className="text-xs text-latte/75">
+                            <p className="text-xs font-medium text-latte">
                                 Status Antrean Pesanan Real-Time
                             </p>
                         </div>
@@ -90,7 +90,7 @@ export default function QueueDisplayPage({
                                 </div>
                             ))}
                             {preparing.length === 0 && (
-                                <p className="col-span-full py-12 text-center text-sm text-latte/50">
+                                <p className="col-span-full py-12 text-center text-sm font-medium text-latte/70">
                                     Belum ada pesanan yang sedang disiapkan.
                                 </p>
                             )}
@@ -111,7 +111,7 @@ export default function QueueDisplayPage({
                             {ready.map((item) => (
                                 <div
                                     key={item.id}
-                                    className="rounded-2xl bg-emerald-500 p-4 text-center text-espresso shadow-md"
+                                    className="rounded-2xl bg-emerald-600 p-4 text-center text-white shadow-md ring-2 ring-emerald-400/40"
                                 >
                                     <p className="font-money text-4xl font-extrabold">
                                         #{item.queue_number}
@@ -124,7 +124,7 @@ export default function QueueDisplayPage({
                                 </div>
                             ))}
                             {ready.length === 0 && (
-                                <p className="col-span-full py-12 text-center text-sm text-emerald-200/50">
+                                <p className="col-span-full py-12 text-center text-sm font-medium text-emerald-200/80">
                                     Belum ada pesanan siap diambil.
                                 </p>
                             )}

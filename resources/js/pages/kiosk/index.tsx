@@ -2,15 +2,14 @@ import { Head } from '@inertiajs/react';
 import {
     AlertTriangle,
     ArrowLeft,
+    Banknote,
     CheckCircle2,
     Coffee,
-    CreditCard,
     Croissant,
     CupSoda,
     Edit2,
     Minus,
     Plus,
-    QrCode,
     RefreshCw,
     ShoppingBag,
     Sparkles,
@@ -603,7 +602,7 @@ export default function KioskIndexPage({
                             </Button>
                         </div>
 
-                        <p className="text-xs text-latte/50">
+                        <p className="text-xs font-medium text-latte/80">
                             Ketuk tombol di atas untuk memulai pesanan Anda
                         </p>
                     </div>
@@ -1045,29 +1044,17 @@ export default function KioskIndexPage({
                                         </span>
                                     </div>
 
-                                    <div className="grid gap-3 sm:grid-cols-2">
+                                    <div className="grid gap-3">
                                         <Button
                                             type="button"
-                                            disabled={submittingCheckout}
-                                            onClick={() =>
-                                                void handleCheckout('qris')
-                                            }
-                                            className="min-h-16 gap-2 rounded-2xl text-base font-extrabold"
-                                        >
-                                            <QrCode className="size-5" />
-                                            Bayar Instan (QRIS)
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            variant="secondary"
                                             disabled={submittingCheckout}
                                             onClick={() =>
                                                 void handleCheckout('cashier')
                                             }
                                             className="min-h-16 gap-2 rounded-2xl text-base font-extrabold"
                                         >
-                                            <CreditCard className="size-5" />
-                                            Bayar di Kasir
+                                            <Banknote className="size-5" />
+                                            Bayar Tunai di Kasir
                                         </Button>
                                     </div>
                                 </div>

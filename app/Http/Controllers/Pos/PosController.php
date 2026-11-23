@@ -87,7 +87,7 @@ class PosController extends Controller
                         'name' => $item->name,
                         'description' => $item->description,
                         'price' => $item->price,
-                        'image_url' => $item->image_path !== null ? asset('storage/'.$item->image_path) : null,
+                        'image_url' => $item->image_path !== null ? asset('storage/'.$item->image_path) : asset('images/dummy-coffee.svg'),
                         'badge' => $item->badge?->value,
                         'is_available' => $avail['is_available'],
                         'unavailable_reason' => $avail['reason'],

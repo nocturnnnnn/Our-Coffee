@@ -11,14 +11,14 @@ Full-stack cafe operations platform unifying **Self-Ordering Kiosk**, **POS Kasi
 - **Device Pairing**: Authorized via `/kiosk/pair/{token}` (`kiosk.device` middleware) without requiring staff authentication on the lobby tablet.
 - **6-Step Ordering Flow**: Welcome/idle screen -> Category & Menu browsing -> Dynamic modifier customization (Size, Sugar, Ice, Add-on) -> Cart drawer -> Dine-In / Takeaway & Payment selection -> Order confirmation & queue ticket.
 - **Touch & Kiosk Hardening**: Minimum `64x64px` touch targets, zoom/context-menu lock, 60-second idle auto-reset (with 50-second warning countdown), and 8-second post-confirmation reset.
-- **Real-Time Stock & Payment**: 5-second menu availability polling, atomic `409 Conflict` stock guard at checkout, **QRIS** (simulated gateway with 2-second status polling) or **Pay at Cashier** (`A-001` queue ticket).
+- **Real-Time Stock & Payment**: 5-second menu availability polling, atomic `409 Conflict` stock guard at checkout, **Pay at Cashier** (`A-001` queue ticket), and simulated QRIS support.
 - **Protected Exit**: Hidden Admin exit gesture verified by 6-digit Supervisor/Admin PIN (`POST /kiosk/exit`, rate-limited `throttle:15,1`).
 
 ### 2. POS Kasir & Shift Management (`/pos`, `/pos/shift`)
 
 - **Mandatory Cash Shift**: Cashiers must open a shift with an opening cash amount before accessing the register and close with actual drawer count & variance tracking.
 - **3-Column Register Layout**: Category/menu grid, live Kiosk Unpaid Queue (`3s` polling) + active order items, and tender panel with `60x60px` touch NumPad.
-- **Order Operations**: Walk-in order creation, Kiosk Pay-at-Cashier settlement (Cash / QRIS), and Supervisor 6-digit PIN void (`POST /pos/orders/{order}/void`, `throttle:15,1`) with automatic stock rollback and audit logging.
+- **Order Operations**: Walk-in order creation, Kiosk Pay-at-Cashier settlement (Tunai / Cash with touch NumPad), and Supervisor 6-digit PIN void (`POST /pos/orders/{order}/void`, `throttle:15,1`) with automatic stock rollback and audit logging.
 - **Thermal Receipt Printing**: Dedicated `58mm` / `80mm` `@media print` thermal receipt layout.
 
 ### 3. Kitchen Display System (`/kds`)
