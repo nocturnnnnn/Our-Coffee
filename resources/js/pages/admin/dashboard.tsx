@@ -150,7 +150,7 @@ export default function AdminDashboard(initialProps: DashboardProps) {
                     <div className="rounded-2xl border bg-card p-5 shadow-xs">
                         <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
                             <span>Total Transaksi</span>
-                            <Receipt className="size-4 text-espresso" />
+                            <Receipt className="size-4 text-primary" />
                         </div>
                         <p className="font-money mt-2 text-2xl font-extrabold">
                             {data.kpis.today_orders}
@@ -301,8 +301,8 @@ export default function AdminDashboard(initialProps: DashboardProps) {
                                     : ratio >= 0.75
                                       ? 'bg-crema text-white'
                                       : ratio >= 0.4
-                                        ? 'bg-amber-300 text-espresso'
-                                        : 'bg-latte text-espresso';
+                                        ? 'bg-amber-400 text-stone-950 font-bold'
+                                        : 'bg-secondary text-secondary-foreground font-medium';
 
                             return (
                                 <div
@@ -392,7 +392,7 @@ export default function AdminDashboard(initialProps: DashboardProps) {
                                     key={ing.id}
                                     className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2 text-xs"
                                 >
-                                    <span className="font-semibold text-espresso">
+                                    <span className="font-semibold text-foreground">
                                         {ing.name}
                                     </span>
                                     <Badge variant="destructive">

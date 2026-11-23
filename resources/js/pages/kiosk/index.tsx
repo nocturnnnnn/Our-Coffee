@@ -560,7 +560,7 @@ export default function KioskIndexPage({
             <Head title={`Kiosk — ${settings.cafe_name}`} />
 
             <div
-                className="min-h-screen w-full touch-manipulation overflow-x-hidden bg-oat text-espresso select-none"
+                className="min-h-screen w-full touch-manipulation overflow-x-hidden bg-background text-foreground select-none"
                 onContextMenu={(e) => e.preventDefault()}
                 onPointerDown={handleUserActivity}
                 onKeyDown={handleUserActivity}
@@ -632,7 +632,7 @@ export default function KioskIndexPage({
                                         'border-primary bg-primary/5',
                                 )}
                             >
-                                <div className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-espresso">
+                                <div className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground">
                                     <Store className="size-9" />
                                 </div>
                                 <div className="text-center">
@@ -657,7 +657,7 @@ export default function KioskIndexPage({
                                         'border-primary bg-primary/5',
                                 )}
                             >
-                                <div className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-espresso">
+                                <div className="flex size-16 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground">
                                     <ShoppingBag className="size-9" />
                                 </div>
                                 <div className="text-center">

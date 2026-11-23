@@ -478,8 +478,8 @@ export default function PosIndexPage({
                                 className={cn(
                                     'min-h-12 shrink-0 rounded-xl px-3.5 text-xs font-bold transition-colors',
                                     selectedCategoryId === null
-                                        ? 'bg-espresso text-oat'
-                                        : 'bg-secondary text-espresso',
+                                        ? 'bg-primary text-primary-foreground shadow-xs'
+                                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
                                 )}
                             >
                                 Semua
@@ -494,8 +494,8 @@ export default function PosIndexPage({
                                     className={cn(
                                         'min-h-12 shrink-0 rounded-xl px-3.5 text-xs font-bold transition-colors',
                                         selectedCategoryId === cat.id
-                                            ? 'bg-espresso text-oat'
-                                            : 'bg-secondary text-espresso',
+                                            ? 'bg-primary text-primary-foreground shadow-xs'
+                                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
                                     )}
                                 >
                                     {cat.name}
